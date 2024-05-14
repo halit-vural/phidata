@@ -8,12 +8,16 @@ and letting it decide how to retrieve the information it needs to answer the que
 > Note: Fork and clone this repository if needed
 
 ### 1. Create a virtual environment
-
+Linux/MacOS
 ```shell
 python3 -m venv ~/.venvs/aienv
 source ~/.venvs/aienv/bin/activate
 ```
-
+Windows
+```shell
+python3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 ### 2. Export `OPENAI_API_KEY`
 
 ```shell

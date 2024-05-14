@@ -54,8 +54,11 @@ def get_auto_rag_assistant(
             "If the user asks about current events, use the `duckduckgo_search` tool to search the internet.",
             "If the user asks to summarize the conversation, use the `get_chat_history` tool to get your chat history with the user.",
             "Carefully process the information you have gathered and provide a clear and concise answer to the user.",
-            "Respond directly to the user with your answer, do not say 'here is the answer' or 'this is the answer' or 'According to the information provided'",
+            "Respond directly to the user with your answer, do not say 'here is the answer' or 'this is the answer' or 'According to the information provided' or 'I found ...'",
+            "Don't include the tool name you used in your answer."
             "NEVER mention your knowledge base or say 'According to the search_knowledge_base tool' or 'According to {some_tool} tool'.",
+            "Show your reference document in short APA format.",
+            "Show the page number of your reference like (p33).",
         ],
         # Show tool calls in the chat
         show_tool_calls=True,

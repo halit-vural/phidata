@@ -1,4 +1,5 @@
 import nest_asyncio
+import os
 from typing import List
 
 import streamlit as st
@@ -152,6 +153,33 @@ def main() -> None:
                 st.session_state[f"{rag_name}_uploaded"] = True
             alert.empty()
             restart_assistant()
+        
+        ## ADD a Collection of files
+        loadAll_btn = st.sidebar.button("Add all files!..")
+        if loadAll_btn:
+            dir = os.path.abspath(os.getcwd()) + '/data/'
+            # st.write("Dir:", dir)
+            files = os.listdir(dir)
+            for file in files:
+                file = dir + file
+                # st.write("File:", file)
+                alert = st.sidebar.info("Processing PDFs...", icon="🧠")
+                rag_name = file.split(".")[0]
+                
+                if f"{rag_name}_uploaded" not in st.session_state:
+                    reader = PDFReader()
+                    rag_documents: List[Document] = reader.read(file)
+                    if rag_documents:
+                        auto_rag_assistant.knowledge_base.load_documents(rag_documents, upsert=True)
+                    else:
+                        st.sidebar.error("Could not read PDF")
+                    st.session_state[f"{rag_name}_uploaded"] = True
+                # alert.empty()
+                # if "file_uploader_key" in st.session_state:
+                #     st.session_state["file_uploader_key"] += 1
+                # st.rerun()
+                restart_assistant()
+
 
     if auto_rag_assistant.knowledge_base and auto_rag_assistant.knowledge_base.vector_db:
         if st.sidebar.button("Clear Knowledge Base"):
@@ -178,3 +206,8 @@ def main() -> None:
 
 
 main()
+
+# import os
+
+# p = os.path.abspath(os.getcwd())
+# st.write("Path:", p)
