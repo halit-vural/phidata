@@ -141,6 +141,7 @@ def main() -> None:
             "Add a PDF :page_facing_up:", type="pdf", key=st.session_state["file_uploader_key"]
         )
         if uploaded_file is not None:
+            # st.write("upload:", uploaded_file)
             alert = st.sidebar.info("Processing PDF...", icon="🧠")
             rag_name = uploaded_file.name.split(".")[0]
             if f"{rag_name}_uploaded" not in st.session_state:
@@ -155,31 +156,59 @@ def main() -> None:
             restart_assistant()
         
         ## ADD a Collection of files
+        if "folder_uploader_key" not in st.session_state:
+            st.session_state["folder_uploader_key"] = 101   # ?? a unique key?
+
+        #I:\My Drive\LLM_Solutions\Autonomous_RAG\data
+        input_folder = st.sidebar.text_input(
+                "Add Folder to Knowledge Base", type="default", key=st.session_state["folder_uploader_key"]
+            )
+
+        if input_folder is not None:
+            # logger.debug(input_folder)
+            # Scan the folder with files.
+            file_names = []
+            if os.path.isdir(input_folder):
+                included_extensions = ['pdf']
+                file_names = [fn for fn in os.listdir(input_folder)
+                            if any(fn.endswith(ext) for ext in included_extensions)]
+            
+            else:
+                logger.debug("Not a folder path..")
+
         loadAll_btn = st.sidebar.button("Add all files!..")
         if loadAll_btn:
-            dir = os.path.abspath(os.getcwd()) + '/data/'
-            # st.write("Dir:", dir)
-            files = os.listdir(dir)
-            for file in files:
-                file = dir + file
-                # st.write("File:", file)
-                alert = st.sidebar.info("Processing PDFs...", icon="🧠")
-                rag_name = file.split(".")[0]
-                
-                if f"{rag_name}_uploaded" not in st.session_state:
-                    reader = PDFReader()
-                    rag_documents: List[Document] = reader.read(file)
-                    if rag_documents:
-                        auto_rag_assistant.knowledge_base.load_documents(rag_documents, upsert=True)
-                    else:
-                        st.sidebar.error("Could not read PDF")
-                    st.session_state[f"{rag_name}_uploaded"] = True
-                # alert.empty()
-                # if "file_uploader_key" in st.session_state:
-                #     st.session_state["file_uploader_key"] += 1
-                # st.rerun()
-                restart_assistant()
+            if file_names is not None:
+                # loadAll_btn.disable()
+                logger.debug("Loading files...")
+                logger.debug(file_names)
+                dir = input_folder
+                for file_name in file_names:
+                    logger.debug(file_name)
+                    alert = st.sidebar.info("Processing : " + file_name, icon="🧠")
+                    rag_name = file_name.split(".")[0]
+                    file = dir + "/" + file_name
+                    
+                    if f"{rag_name}_uploaded" not in st.session_state:
+                        try:
+                            reader = PDFReader()
+                            rag_documents: List[Document] = reader.read(file)
+                        except Exception as e:
+                            logger.error(e.__traceback__)
+                            continue
 
+                        if rag_documents:
+                            auto_rag_assistant.knowledge_base.load_documents(rag_documents, upsert=True)
+                        else:
+                            st.sidebar.error("Could not read PDF:" + file_name)
+                        st.session_state[f"{rag_name}_uploaded"] = True
+                    alert.empty()
+                    if "file_uploader_key" in st.session_state:
+                        st.session_state["file_uploader_key"] += 1
+                st.rerun()
+                restart_assistant()
+            else:
+                st.sidebar.error("Enter a folder path first..")
 
     if auto_rag_assistant.knowledge_base and auto_rag_assistant.knowledge_base.vector_db:
         if st.sidebar.button("Clear Knowledge Base"):
