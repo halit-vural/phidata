@@ -19,7 +19,11 @@ st.set_page_config(
 st.title("Autonomous RAG with Llama3")
 st.markdown("##### :orange_heart: built using [phidata](https://github.com/phidatahq/phidata)")
 
-
+def chat_token_size(chat_history:list) -> int:
+    n = 0
+    for msg in chat_history:
+        n += len(msg['content'].strip().split())
+    return n
 def restart_assistant():
     logger.debug("---*--- Restarting Assistant ---*---")
     st.session_state["auto_rag_assistant"] = None
@@ -77,10 +81,14 @@ def main() -> None:
     assistant_chat_history = auto_rag_assistant.memory.get_chat_history()
     if len(assistant_chat_history) > 0:
         logger.debug("Loading chat history")
+        logger.debug(f"Chat Length:{chat_token_size(assistant_chat_history)}")
+        # logger.debug(str(assistant_chat_history))
+
         st.session_state["messages"] = assistant_chat_history
     else:
         logger.debug("No chat history found")
-        st.session_state["messages"] = [{"role": "assistant", "content": "Upload a doc and ask me questions..."}]
+        # st.session_state["messages"] = [{"role": "assistant", "content": "Upload a doc and ask me questions..."}]
+        st.session_state["messages"] = [{"role": "assistant", "content": "Welcome to ETIO Services... How can I help you?"}]
 
     # Prompt for user input
     if prompt := st.chat_input():
@@ -101,6 +109,8 @@ def main() -> None:
             resp_container = st.empty()
             # Streaming is not supported with function calling on Groq atm
             response = auto_rag_assistant.run(question, stream=False)
+            logger.debug(f"Question:{question}, response:{response}")
+
             resp_container.markdown(response)  # type: ignore
             # Once streaming is supported, the following code can be used
             # response = ""
@@ -135,7 +145,7 @@ def main() -> None:
 
         # Add PDFs to knowledge base
         if "file_uploader_key" not in st.session_state:
-            st.session_state["file_uploader_key"] = 100
+            st.session_state["file_uploader_key"] = 1000
 
         uploaded_file = st.sidebar.file_uploader(
             "Add a PDF :page_facing_up:", type="pdf", key=st.session_state["file_uploader_key"]

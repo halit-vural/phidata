@@ -32,6 +32,36 @@ def get_auto_rag_assistant(
         "auto_rag_documents_groq_ollama" if embeddings_model == "nomic-embed-text" else "auto_rag_documents_groq_openai"
     )
 
+    default_description = "You are an Assistant called 'AutoRAG' that answers questions by calling functions."
+    default_instructions = [
+            "First get additional information about the users question.",
+            "You can either use the `search_knowledge_base` tool to search your knowledge base or the `duckduckgo_search` tool to search the internet.",
+            "If the user asks about current events, use the `duckduckgo_search` tool to search the internet.",
+            "If the user asks to summarize the conversation, use the `get_chat_history` tool to get your chat history with the user.",
+            "Carefully process the information you have gathered and provide a clear and concise answer to the user.",
+            "Respond directly to the user with your answer, do not say 'here is the answer' or 'this is the answer' or 'According to the information provided' or 'I found ...'",
+            "Don't include the tool name you used in your answer."
+            "NEVER mention your knowledge base or say 'According to the search_knowledge_base tool' or 'According to {some_tool} tool'.",
+            "Show your reference document in short APA format.",
+            "Show the page number of your reference like (p33).",
+        ]
+    
+    etio_description = "You are an Assistant called 'ETIO Chatbot' that answers questions by calling functions."
+    etio_instructions = [
+            "Respond to greetings with a nice greeting.",
+            "Give as possible as short answers.",
+            "Answer all questions according to ETIO Consulting Services. Do not answer unrelated questions.",
+            "When the question is general like no relation to ETIO or no mentions about ETIO, do not give the answer to that question and say 'I can answer your specific questions about ETIO services.'.",
+            "Answer the questions directly. Don't include the tool name you used in your answer.",
+            "NEVER mention your knowledge base or say 'According to the search_knowledge_base tool' or 'According to {some_tool} tool'.",
+            "When the user ask about you, say 'I am a robot to help you about ETIO services.'",
+            "Answer the users question by only using `search_knowledge_base` tool.",
+            "If the user asks to summarize the conversation, use the `get_chat_history` tool to get your chat history with the user.",
+            # "Carefully process the information you have gathered and provide a clear and concise answer to the user.",
+            "Respond directly to the user with your answer, do not say 'here is the answer' or 'this is the answer' or 'According to the information provided' or 'I found ...'",
+            "Show your reference in short APA format.",
+        ]
+
     return Assistant(
         name="auto_rag_assistant_groq",
         run_id=run_id,
@@ -47,19 +77,8 @@ def get_auto_rag_assistant(
             # 3 references are added to the prompt
             num_documents=3,
         ),
-        description="You are an Assistant called 'AutoRAG' that answers questions by calling functions.",
-        instructions=[
-            "First get additional information about the users question.",
-            "You can either use the `search_knowledge_base` tool to search your knowledge base or the `duckduckgo_search` tool to search the internet.",
-            "If the user asks about current events, use the `duckduckgo_search` tool to search the internet.",
-            "If the user asks to summarize the conversation, use the `get_chat_history` tool to get your chat history with the user.",
-            "Carefully process the information you have gathered and provide a clear and concise answer to the user.",
-            "Respond directly to the user with your answer, do not say 'here is the answer' or 'this is the answer' or 'According to the information provided' or 'I found ...'",
-            "Don't include the tool name you used in your answer."
-            "NEVER mention your knowledge base or say 'According to the search_knowledge_base tool' or 'According to {some_tool} tool'.",
-            "Show your reference document in short APA format.",
-            "Show the page number of your reference like (p33).",
-        ],
+        description=etio_description,               ## ??
+        instructions=etio_instructions,
         # Show tool calls in the chat
         show_tool_calls=True,
         # This setting gives the LLM a tool to search for information
